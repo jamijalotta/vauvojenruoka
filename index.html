@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23A15A3A'/%3E%3Crect x='82' y='46' width='36' height='18' rx='6' fill='%23FFF8F0'/%3E%3Crect x='70' y='64' width='60' height='92' rx='18' fill='%23FFF8F0'/%3E%3Ccircle cx='85' cy='172' r='10' fill='%23C96A7C'/%3E%3Ccircle cx='115' cy='172' r='10' fill='%234E8A7E'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23A15A3A'/%3E%3Crect x='82' y='46' width='36' height='18' rx='6' fill='%23FFF8F0'/%3E%3Crect x='70' y='64' width='60' height='92' rx='18' fill='%23FFF8F0'/%3E%3Ccircle cx='85' cy='172' r='10' fill='%23C96A7C'/%3E%3Ccircle cx='115' cy='172' r='10' fill='%234E8A7E'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Sy%C3%B6tt%C3%B6kalenteri%22%2C%22short_name%22%3A%22Sy%C3%B6t%C3%B6t%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F3F1F6%22%2C%22theme_color%22%3A%22%23A15A3A%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%2527http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%3D%25270%25200%2520200%2520200%2527%253E%253Crect%2520width%3D%2527200%2527%2520height%3D%2527200%2527%2520rx%3D%252744%2527%2520fill%3D%2527%2523A15A3A%2527%2F%253E%253Crect%2520x%3D%252782%2527%2520y%3D%252746%2527%2520width%3D%252736%2527%2520height%3D%252718%2527%2520rx%3D%25276%2527%2520fill%3D%2527%2523FFF8F0%2527%2F%253E%253Crect%2520x%3D%252770%2527%2520y%3D%252764%2527%2520width%3D%252760%2527%2520height%3D%252792%2527%2520rx%3D%252718%2527%2520fill%3D%2527%2523FFF8F0%2527%2F%253E%253Ccircle%2520cx%3D%252785%2527%2520cy%3D%2527172%2527%2520r%3D%252710%2527%2520fill%3D%2527%2523C96A7C%2527%2F%253E%253Ccircle%2520cx%3D%2527115%2527%2520cy%3D%2527172%2527%2520r%3D%252710%2527%2520fill%3D%2527%25234E8A7E%2527%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Syötöt">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#A15A3A">
+<title>Syöttökalenteri</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Nunito+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root{
+  --bg: #F3F1F6;
+  --surface: #FFFFFF;
+  --ink: #322F3D;
+  --ink-soft: #756F86;
+  --border: #E4E0EC;
+  --amelia: #C96A7C;
+  --amelia-soft: #F5DEE3;
+  --eden: #4E8A7E;
+  --eden-soft: #DCEEEA;
+  --milk: #E5B23F;
+  --milk-soft: #FAEACB;
+  --formula: #6E93C9;
+  --formula-soft: #DEE7F5;
+  --accent: #A15A3A;
+  --radius: 16px;
+  --shadow: 0 2px 14px rgba(50,47,61,0.07);
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+
+html, body{
+  height:100%;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Nunito Sans', sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  overscroll-behavior-y: contain;
+}
+
+.wrap{
+  max-width:640px;
+  margin:0 auto;
+  padding:20px 16px 60px;
+  min-height:100dvh;
+}
+
+header{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+h1{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size:1.7rem;
+  margin:0 0 2px;
+  letter-spacing:-0.01em;
+}
+
+.subtitle{
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  margin-bottom:16px;
+}
+.subtitle .dot-a{color:var(--amelia); font-weight:700;}
+.subtitle .dot-e{color:var(--eden); font-weight:700;}
+
+.week-nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.week-nav button{
+  border:none;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  font-size:1.1rem;
+  color:var(--accent);
+  cursor:pointer;
+}
+.week-nav button:active{transform:scale(0.94);}
+
+.week-label{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:0.8rem;
+  color:var(--ink-soft);
+  min-width:180px;
+  text-align:center;
+}
+
+.today-btn{
+  display:block;
+  margin:0 auto 20px;
+  background:none;
+  border:1px solid var(--border);
+  color:var(--ink-soft);
+  font-family:'Nunito Sans', sans-serif;
+  font-size:0.78rem;
+  padding:5px 14px;
+  border-radius:999px;
+  cursor:pointer;
+}
+.today-btn:hover{border-color:var(--accent); color:var(--accent);}
+
+.day-card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  margin-bottom:14px;
+  padding:14px 16px 16px;
+}
+.day-card.is-today{
+  outline:2px solid var(--accent);
+  outline-offset:-2px;
+}
+
+.day-header{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+.day-name{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size:1.05rem;
+}
+.day-date{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:0.78rem;
+  color:var(--ink-soft);
+}
+.today-tag{
+  font-size:0.65rem;
+  background:var(--accent);
+  color:#fff;
+  padding:1px 7px;
+  border-radius:999px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+
+.babies{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.baby-section{
+  border-radius:12px;
+  padding:10px 12px 12px;
+}
+.baby-section.amelia{background:var(--amelia-soft);}
+.baby-section.eden{background:var(--eden-soft);}
+
+.baby-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.baby-id{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.avatar{
+  width:22px;height:22px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces', serif;
+  font-size:0.72rem;
+  font-weight:600;
+  color:#fff;
+}
+.amelia .avatar{background:var(--amelia);}
+.eden .avatar{background:var(--eden);}
+.baby-name{font-weight:700; font-size:0.92rem;}
+.baby-stats{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:0.72rem;
+  color:var(--ink-soft);
+}
+
+.feed-bar{
+  display:flex;
+  height:8px;
+  border-radius:5px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.6);
+  margin-bottom:8px;
+}
+.feed-bar .seg{height:100%;}
+.feed-bar .seg.type-milk{background:var(--milk);}
+.feed-bar .seg.type-formula{background:var(--formula);}
+.feed-bar.empty{
+  background:repeating-linear-gradient(90deg, rgba(50,47,61,0.08) 0 6px, transparent 6px 12px);
+}
+
+.feed-list{
+  list-style:none;
+  margin:0 0 8px;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.feed-entry{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,0.65);
+  border-radius:8px;
+  padding:5px 8px;
+  font-size:0.82rem;
+}
+.feed-time{
+  font-family:'IBM Plex Mono', monospace;
+  color:var(--ink-soft);
+  min-width:40px;
+}
+.feed-type{
+  font-size:0.68rem;
+  font-weight:700;
+  padding:2px 7px;
+  border-radius:999px;
+}
+.feed-type.type-milk{background:var(--milk-soft); color:#7A5A10;}
+.feed-type.type-formula{background:var(--formula-soft); color:#2E4E7A;}
+.feed-amount{
+  font-family:'IBM Plex Mono', monospace;
+  font-weight:600;
+  margin-left:auto;
+}
+.delete-feed{
+  border:none;
+  background:none;
+  color:var(--ink-soft);
+  font-size:1rem;
+  line-height:1;
+  cursor:pointer;
+  padding:0 2px;
+}
+.delete-feed:hover{color:#B23A3A;}
+
+.empty-note{
+  font-size:0.78rem;
+  color:var(--ink-soft);
+  font-style:italic;
+  margin:2px 0 8px;
+}
+
+.add-feed-btn{
+  border:none;
+  background:none;
+  font-weight:700;
+  font-size:0.8rem;
+  cursor:pointer;
+  padding:2px 0;
+}
+.amelia .add-feed-btn{color:var(--amelia);}
+.eden .add-feed-btn{color:var(--eden);}
+
+.add-feed-form{
+  display:none;
+  gap:6px;
+  margin-top:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.add-feed-form.open{display:flex;}
+.add-feed-form input, .add-feed-form select{
+  font-family:'Nunito Sans', sans-serif;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:5px 7px;
+  font-size:0.8rem;
+  background:#fff;
+}
+.add-feed-form input[type="time"]{width:88px;}
+.add-feed-form input[type="number"]{width:64px;}
+.add-feed-form .save-btn{
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  border-radius:8px;
+  padding:5px 12px;
+  font-size:0.8rem;
+  cursor:pointer;
+}
+.add-feed-form .cancel-add{
+  border:none;
+  background:none;
+  color:var(--ink-soft);
+  font-size:0.8rem;
+  cursor:pointer;
+}
+
+.summary{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
+  margin-top:22px;
+}
+.summary h2{
+  font-family:'Fraunces', serif;
+  font-size:1.05rem;
+  margin:0 0 12px;
+  font-weight:600;
+}
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+  font-size:0.85rem;
+}
+.summary-row:last-child{border-bottom:none;}
+.summary-baby{display:flex; align-items:center; gap:8px; font-weight:700;}
+.summary-total{font-family:'IBM Plex Mono', monospace; font-weight:600;}
+.summary-breakdown{font-size:0.72rem; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace;}
+
+.legend{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  margin-top:16px;
+  font-size:0.74rem;
+  color:var(--ink-soft);
+}
+.legend span{display:flex; align-items:center; gap:5px;}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+.footer-actions{
+  text-align:center;
+  margin-top:26px;
+}
+.reset-btn{
+  border:none;
+  background:none;
+  color:var(--ink-soft);
+  font-size:0.72rem;
+  text-decoration:underline;
+  cursor:pointer;
+}
+.reset-btn.confirming{color:#B23A3A; font-weight:700;}
+
+.loading{
+  text-align:center;
+  color:var(--ink-soft);
+  padding:60px 0;
+  font-style:italic;
+}
+
+.sync-status{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font-size:0.78rem;
+  color:var(--ink-soft);
+  margin-bottom:10px;
+  flex-wrap:wrap;
+  text-align:center;
+}
+.sync-status.error{
+  color:#B23A3A;
+  font-weight:700;
+}
+.sync-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#C9A23F;
+}
+.sync-status.connected .sync-dot{background:#4E8A6B;}
+.sync-status.error .sync-dot{background:#B23A3A;}
+.sync-status a{color:var(--accent); text-decoration:underline; cursor:pointer;}
+.refresh-btn{
+  border:none;
+  background:none;
+  color:var(--accent);
+  font-size:0.85rem;
+  line-height:1;
+  cursor:pointer;
+  padding:2px 4px;
+}
+.refresh-btn.spinning{animation: spin 0.6s linear;}
+@keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+.setup-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px 16px;
+}
+.setup-box{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:24px 20px;
+  max-width:480px;
+  width:100%;
+}
+.setup-box h2{
+  font-family:'Fraunces', serif;
+  font-size:1.3rem;
+  margin:0 0 10px;
+}
+.setup-box p{
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  line-height:1.5;
+}
+.setup-box ol{
+  font-size:0.83rem;
+  color:var(--ink);
+  line-height:1.6;
+  padding-left:20px;
+  margin:10px 0 16px;
+}
+.setup-box textarea{
+  width:100%;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:0.75rem;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  resize:vertical;
+  margin-bottom:10px;
+}
+.setup-box .save-btn{
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  border-radius:10px;
+  padding:10px 18px;
+  font-size:0.85rem;
+  cursor:pointer;
+  width:100%;
+}
+.setup-box input[type="url"]{
+  width:100%;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:0.8rem;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+}
+.setup-error{
+  color:#B23A3A;
+  font-size:0.78rem;
+  margin-top:8px;
+  display:none;
+}
+</style>
+</head>
+<body>
+
+<div class="setup-screen" id="setupScreen" style="display:none;">
+  <div class="setup-box">
+    <h2>Vaihda Google Sheets -osoitetta</h2>
+    <p>Kalenteri on jo valmiiksi yhdistetty. Tätä tarvitset vain, jos haluat osoittaa sen toiseen Sheet-tiedostoon:</p>
+    <input type="url" id="configInput" placeholder="https://script.google.com/macros/s/…/exec">
+    <button class="save-btn" id="saveConfigBtn">Tallenna ja yhdistä</button>
+    <button class="save-btn" id="cancelConfigBtn" style="background:none;color:var(--ink-soft);box-shadow:none;margin-top:4px;">Peruuta</button>
+    <div class="setup-error" id="setupError">Osoitetta ei tunnistettu. Tarkista, että se alkaa https://script.google.com/ ja päättyy /exec.</div>
+  </div>
+</div>
+
+<div class="wrap" id="mainApp">
+  <header>
+    <h1>Syöttökalenteri</h1>
+    <div class="subtitle"><span class="dot-a">Amelia</span> &amp; <span class="dot-e">Eden</span></div>
+    <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span id="syncText">Yhdistetään…</span> · <button class="refresh-btn" id="refreshBtn" aria-label="Päivitä">⟳</button> · <a id="changeConfigLink">vaihda asetukset</a></div>
+    <div class="week-nav">
+      <button id="prevWeek" aria-label="Edellinen viikko">‹</button>
+      <span class="week-label" id="weekLabel"></span>
+      <button id="nextWeek" aria-label="Seuraava viikko">›</button>
+    </div>
+    <button class="today-btn" id="todayBtn">Tämä viikko</button>
+  </header>
+
+  <main id="days">
+    <div class="loading">Ladataan tietoja…</div>
+  </main>
+
+  <div class="summary" id="summary" style="display:none;">
+    <h2>Viikon yhteenveto</h2>
+    <div id="summaryBody"></div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--milk)"></i> Äidinmaito</span>
+    <span><i style="background:var(--formula)"></i> Korvike</span>
+  </div>
+
+  <div class="footer-actions">
+    <button class="reset-btn" id="resetBtn">Tyhjennä kaikki tallennetut tiedot</button>
+  </div>
+</div>
+
+<script>
+const BABIES = [
+  {name:'Amelia', key:'amelia'},
+  {name:'Eden', key:'eden'}
+];
+const WEEKDAYS_FI = ['Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai','Sunnuntai'];
+const MONTHS_FI = ['tammikuuta','helmikuuta','maaliskuuta','huhtikuuta','toukokuuta','kesäkuuta','heinäkuuta','elokuuta','syyskuuta','lokakuuta','marraskuuta','joulukuuta'];
+const CONFIG_KEY = 'sheets_endpoint_v1';
+const DEFAULT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyjFtzyDdhCBd6PVOGVA77aV3SFRPCgpbW5Znb82SC6nHqJfgzPo6v3dNBEk73UYCMT/exec';
+const POLL_MS = 20000;
+
+let feedingLog = {};
+let currentMonday = getMonday(new Date());
+let resetArmed = false;
+let endpointUrl = null;
+let pollTimer = null;
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+
+function toISODate(d){
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function getMonday(d){
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  date.setDate(date.getDate() + diff);
+  date.setHours(0,0,0,0);
+  return date;
+}
+
+function addDays(d, n){
+  const date = new Date(d);
+  date.setDate(date.getDate() + n);
+  return date;
+}
+
+function genId(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+function weekLabel(monday){
+  const sunday = addDays(monday, 6);
+  if(monday.getMonth() === sunday.getMonth()){
+    return `${monday.getDate()}.–${sunday.getDate()}. ${MONTHS_FI[monday.getMonth()]} ${monday.getFullYear()}`;
+  }
+  return `${monday.getDate()}. ${MONTHS_FI[monday.getMonth()]} – ${sunday.getDate()}. ${MONTHS_FI[sunday.getMonth()]} ${sunday.getFullYear()}`;
+}
+
+function feedCountLabel(n){
+  return n === 1 ? '1 syöttö' : `${n} syöttöä`;
+}
+
+function setSyncStatus(state, text){
+  const el = document.getElementById('syncStatus');
+  const txt = document.getElementById('syncText');
+  el.classList.remove('connected','error');
+  if(state) el.classList.add(state);
+  txt.textContent = text;
+}
+
+async function fetchAllFeeds(){
+  try{
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(endpointUrl, { method: 'GET', signal: controller.signal });
+    clearTimeout(timeoutId);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    const newLog = {};
+    rows.forEach(r => {
+      let dateKey = r.date;
+      let timeVal = r.time;
+      // Vikasietoisuus: jos Apps Script/Sheets palauttaa täyden ISO-aikaleiman
+      // pelkän päivämäärän sijaan, johdetaan oikea paikallinen päivä siitä.
+      if(typeof dateKey === 'string' && dateKey.includes('T')){
+        dateKey = toISODate(new Date(dateKey));
+      }
+      if(typeof timeVal === 'string' && timeVal.includes('T')){
+        const d = new Date(timeVal);
+        timeVal = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+      if(!newLog[dateKey]) newLog[dateKey] = [];
+      newLog[dateKey].push({ id: r.id, baby: r.baby, type: r.type, time: timeVal, amount: Number(r.amount) });
+    });
+    Object.values(newLog).forEach(arr => arr.sort((a,b) => a.time.localeCompare(b.time)));
+    feedingLog = newLog;
+    setSyncStatus('connected', 'Synkronoitu (Google Sheets)');
+    render();
+  }catch(e){
+    console.error(e);
+    const msg = e.name === 'AbortError' ? 'Yhteys aikakatkaistu (8s)' : (e.message || String(e));
+    setSyncStatus('error', 'Virhe: ' + msg);
+  }
+}
+
+function postAction(payload){
+  return fetch(endpointUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+}
+
+function addFeed(dateStr, baby, type, time, amount){
+  const id = genId();
+  if(!feedingLog[dateStr]) feedingLog[dateStr] = [];
+  feedingLog[dateStr].push({ id, baby, type, time, amount });
+  feedingLog[dateStr].sort((a,b) => a.time.localeCompare(b.time));
+  render();
+  postAction({ action: 'add', id, date: dateStr, baby, type, time, amount })
+    .then(() => fetchAllFeeds())
+    .catch(e => {
+      console.error(e);
+      setSyncStatus('error', 'Tallennus epäonnistui – tarkista yhteys');
+    });
+}
+
+function deleteFeed(dateStr, id){
+  if(feedingLog[dateStr]) feedingLog[dateStr] = feedingLog[dateStr].filter(f => f.id !== id);
+  render();
+  postAction({ action: 'delete', id })
+    .then(() => fetchAllFeeds())
+    .catch(e => {
+      console.error(e);
+      setSyncStatus('error', 'Poisto epäonnistui – tarkista yhteys');
+    });
+}
+
+async function resetAllData(){
+  feedingLog = {};
+  render();
+  await postAction({ action: 'reset' });
+  fetchAllFeeds();
+}
+
+function connectSheets(url){
+  endpointUrl = url;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = '';
+  setSyncStatus(null, 'Yhdistetään…');
+  fetchAllFeeds();
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(fetchAllFeeds, POLL_MS);
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible') fetchAllFeeds();
+  });
+}
+
+function babyFeedsForDate(dateStr, babyName){
+  return (feedingLog[dateStr] || []).filter(f => f.baby === babyName);
+}
+
+function renderBabyBar(feeds){
+  const total = feeds.reduce((s,f) => s + f.amount, 0);
+  if(total === 0){
+    return `<div class="feed-bar empty"></div>`;
+  }
+  const segs = feeds.map(f => {
+    const pct = (f.amount / total) * 100;
+    const cls = f.type === 'äidinmaito' ? 'type-milk' : 'type-formula';
+    return `<div class="seg ${cls}" style="width:${pct}%" title="${f.time} · ${f.amount} ml"></div>`;
+  }).join('');
+  return `<div class="feed-bar">${segs}</div>`;
+}
+
+function renderBabySection(dateStr, baby){
+  const feeds = babyFeedsForDate(dateStr, baby.name);
+  const total = feeds.reduce((s,f) => s + f.amount, 0);
+
+  const listHtml = feeds.length
+    ? `<ul class="feed-list">${feeds.map(f => `
+        <li class="feed-entry" data-id="${f.id}">
+          <span class="feed-time">${f.time}</span>
+          <span class="feed-type ${f.type === 'äidinmaito' ? 'type-milk' : 'type-formula'}">${f.type === 'äidinmaito' ? 'Äidinmaito' : 'Korvike'}</span>
+          <span class="feed-amount">${f.amount} ml</span>
+          <button class="delete-feed" aria-label="Poista syöttö">×</button>
+        </li>`).join('')}</ul>`
+    : `<div class="empty-note">Ei vielä syöttöjä.</div>`;
+
+  return `
+    <div class="baby-section ${baby.key}" data-baby="${baby.name}">
+      <div class="baby-header">
+        <div class="baby-id">
+          <span class="avatar">${baby.name[0]}</span>
+          <span class="baby-name">${baby.name}</span>
+        </div>
+        <span class="baby-stats">${feedCountLabel(feeds.length)} · ${total} ml</span>
+      </div>
+      ${renderBabyBar(feeds)}
+      ${listHtml}
+      <button class="add-feed-btn" data-baby="${baby.name}">+ Lisää syöttö</button>
+      <form class="add-feed-form">
+        <input type="time" class="feed-time-input" required>
+        <select class="feed-type-input">
+          <option value="äidinmaito">Äidinmaito</option>
+          <option value="korvike">Korvike</option>
+        </select>
+        <input type="number" class="feed-amount-input" placeholder="ml" min="1" step="1" required>
+        <button type="submit" class="save-btn">Tallenna</button>
+        <button type="button" class="cancel-add">Peruuta</button>
+      </form>
+    </div>`;
+}
+
+function renderDayCard(date){
+  const dateStr = toISODate(date);
+  const isToday = dateStr === toISODate(new Date());
+  const dayIdx = (date.getDay() + 6) % 7;
+
+  return `
+    <section class="day-card ${isToday ? 'is-today' : ''}" data-date="${dateStr}">
+      <div class="day-header">
+        <span class="day-name">${WEEKDAYS_FI[dayIdx]}${isToday ? '<span class="today-tag">Tänään</span>' : ''}</span>
+        <span class="day-date">${date.getDate()}.${date.getMonth()+1}.</span>
+      </div>
+      <div class="babies">
+        ${BABIES.map(b => renderBabySection(dateStr, b)).join('')}
+      </div>
+    </section>`;
+}
+
+function renderSummary(weekDates){
+  const summaryEl = document.getElementById('summary');
+  const body = document.getElementById('summaryBody');
+  summaryEl.style.display = 'block';
+
+  body.innerHTML = BABIES.map(baby => {
+    let total = 0, milk = 0, formula = 0, count = 0;
+    weekDates.forEach(d => {
+      babyFeedsForDate(toISODate(d), baby.name).forEach(f => {
+        total += f.amount;
+        count += 1;
+        if(f.type === 'äidinmaito') milk += f.amount; else formula += f.amount;
+      });
+    });
+    return `
+      <div class="summary-row">
+        <div class="summary-baby"><span class="avatar" style="background:var(--${baby.key})">${baby.name[0]}</span> ${baby.name}</div>
+        <div style="text-align:right;">
+          <div class="summary-total">${total} ml · ${feedCountLabel(count)}</div>
+          <div class="summary-breakdown">äidinmaito ${milk} ml · korvike ${formula} ml</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function render(){
+  document.getElementById('weekLabel').textContent = weekLabel(currentMonday);
+  const weekDates = Array.from({length:7}, (_,i) => addDays(currentMonday, i));
+  const daysEl = document.getElementById('days');
+  daysEl.innerHTML = weekDates.map(renderDayCard).join('');
+  renderSummary(weekDates);
+}
+
+function setupEvents(){
+  document.getElementById('prevWeek').addEventListener('click', () => {
+    currentMonday = addDays(currentMonday, -7);
+    render();
+  });
+  document.getElementById('nextWeek').addEventListener('click', () => {
+    currentMonday = addDays(currentMonday, 7);
+    render();
+  });
+  document.getElementById('todayBtn').addEventListener('click', () => {
+    currentMonday = getMonday(new Date());
+    render();
+  });
+  document.getElementById('refreshBtn').addEventListener('click', (e) => {
+    e.target.classList.add('spinning');
+    fetchAllFeeds().finally(() => e.target.classList.remove('spinning'));
+  });
+
+  document.getElementById('days').addEventListener('click', (e) => {
+    const addBtn = e.target.closest('.add-feed-btn');
+    if(addBtn){
+      const section = addBtn.closest('.baby-section');
+      const form = section.querySelector('.add-feed-form');
+      const timeInput = form.querySelector('.feed-time-input');
+      const now = new Date();
+      timeInput.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      form.classList.add('open');
+      addBtn.style.display = 'none';
+      return;
+    }
+    const cancelBtn = e.target.closest('.cancel-add');
+    if(cancelBtn){
+      const section = cancelBtn.closest('.baby-section');
+      section.querySelector('.add-feed-form').classList.remove('open');
+      section.querySelector('.add-feed-btn').style.display = '';
+      return;
+    }
+    const delBtn = e.target.closest('.delete-feed');
+    if(delBtn){
+      const dateStr = delBtn.closest('.day-card').dataset.date;
+      const id = delBtn.closest('.feed-entry').dataset.id;
+      deleteFeed(dateStr, id);
+      return;
+    }
+  });
+
+  document.getElementById('days').addEventListener('submit', (e) => {
+    if(!e.target.classList.contains('add-feed-form')) return;
+    e.preventDefault();
+    const form = e.target;
+    const section = form.closest('.baby-section');
+    const dateStr = form.closest('.day-card').dataset.date;
+    const baby = section.dataset.baby;
+    const time = form.querySelector('.feed-time-input').value;
+    const type = form.querySelector('.feed-type-input').value;
+    const amount = parseInt(form.querySelector('.feed-amount-input').value, 10);
+    if(!time || !amount || amount <= 0) return;
+    addFeed(dateStr, baby, type, time, amount);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', (e) => {
+    if(!resetArmed){
+      resetArmed = true;
+      e.target.textContent = 'Varmista: paina uudelleen tyhjentääksesi kaiken';
+      e.target.classList.add('confirming');
+      setTimeout(() => {
+        if(resetArmed){
+          resetArmed = false;
+          e.target.textContent = 'Tyhjennä kaikki tallennetut tiedot';
+          e.target.classList.remove('confirming');
+        }
+      }, 4000);
+      return;
+    }
+    resetArmed = false;
+    e.target.textContent = 'Tyhjennä kaikki tallennetut tiedot';
+    e.target.classList.remove('confirming');
+    resetAllData();
+  });
+}
+
+function setupConfigScreen(){
+  document.getElementById('saveConfigBtn').addEventListener('click', () => {
+    const raw = document.getElementById('configInput').value.trim();
+    document.getElementById('setupError').style.display = 'none';
+    if(!raw || !raw.startsWith('https://script.google.com/') || !raw.endsWith('/exec')){
+      document.getElementById('setupError').style.display = 'block';
+      return;
+    }
+    localStorage.setItem(CONFIG_KEY, raw);
+    connectSheets(raw);
+  });
+
+  document.getElementById('cancelConfigBtn').addEventListener('click', () => {
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = '';
+  });
+
+  document.getElementById('changeConfigLink').addEventListener('click', () => {
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'flex';
+    document.getElementById('configInput').value = localStorage.getItem(CONFIG_KEY) || DEFAULT_ENDPOINT;
+  });
+}
+
+function init(){
+  setupEvents();
+  setupConfigScreen();
+  render();
+  const endpoint = localStorage.getItem(CONFIG_KEY) || DEFAULT_ENDPOINT;
+  connectSheets(endpoint);
+}
+
+init();
+</script>
+</body>
+</html>
