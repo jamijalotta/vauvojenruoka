@@ -319,6 +319,48 @@ h1{
   cursor:pointer;
 }
 
+.vitamin-toggle{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding-top:8px;
+  border-top:1px dashed rgba(50,47,61,0.12);
+  font-size:0.76rem;
+  color:var(--ink-soft);
+  cursor:pointer;
+}
+.vitamin-toggle input{
+  width:15px;
+  height:15px;
+  cursor:pointer;
+}
+
+.daily-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+  font-size:0.8rem;
+}
+.daily-row:last-child{border-bottom:none;}
+.daily-day{
+  font-family:'IBM Plex Mono', monospace;
+  color:var(--ink-soft);
+}
+.daily-babies{display:flex; gap:12px;}
+.daily-baby{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-family:'IBM Plex Mono', monospace;
+  font-weight:600;
+}
+.daily-baby .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.daily-baby.amelia .dot{background:var(--amelia);}
+.daily-baby.eden .dot{background:var(--eden);}
+
 .summary{
   background:var(--surface);
   border-radius:var(--radius);
@@ -514,6 +556,8 @@ h1{
   <div class="summary" id="summary" style="display:none;">
     <h2>Viikon yhteenveto</h2>
     <div id="summaryBody"></div>
+    <h2 style="margin-top:18px;">Päiväkohtainen tulos</h2>
+    <div id="dailyBreakdown"></div>
   </div>
 
   <div class="legend">
@@ -534,6 +578,7 @@ const BABIES = [
 const WEEKDAYS_FI = ['Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai','Sunnuntai'];
 const MONTHS_FI = ['tammikuuta','helmikuuta','maaliskuuta','huhtikuuta','toukokuuta','kesäkuuta','heinäkuuta','elokuuta','syyskuuta','lokakuuta','marraskuuta','joulukuuta'];
 const CONFIG_KEY = 'sheets_endpoint_v1';
+const DEFAULTS_KEY = 'last_feed_defaults_v1';
 const DEFAULT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyjFtzyDdhCBd6PVOGVA77aV3SFRPCgpbW5Znb82SC6nHqJfgzPo6v3dNBEk73UYCMT/exec';
 const POLL_MS = 20000;
 
@@ -542,6 +587,7 @@ let currentMonday = getMonday(new Date());
 let resetArmed = false;
 let endpointUrl = null;
 let pollTimer = null;
+let lastFeedDefaults = {};
 
 function pad(n){ return n.toString().padStart(2,'0'); }
 
@@ -588,14 +634,35 @@ function setSyncStatus(state, text){
   txt.textContent = text;
 }
 
-async function fetchAllFeeds(){
+async function fetchOnce(timeoutMs){
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try{
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(endpointUrl, { method: 'GET', signal: controller.signal });
-    clearTimeout(timeoutId);
     if(!res.ok) throw new Error('HTTP ' + res.status);
-    const rows = await res.json();
+    return await res.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchAllFeeds(){
+  let rows;
+  try{
+    rows = await fetchOnce(20000);
+  }catch(e1){
+    // Google Apps Script voi "herätä" hitaasti pitkän tauon jälkeen.
+    // Yritetään kerran uudelleen ennen kuin näytetään virhe.
+    try{
+      rows = await fetchOnce(20000);
+    }catch(e2){
+      console.error(e2);
+      const msg = e2.name === 'AbortError' ? 'Yhteys aikakatkaistu' : (e2.message || String(e2));
+      setSyncStatus('error', 'Virhe: ' + msg);
+      return;
+    }
+  }
+  try{
     const newLog = {};
     rows.forEach(r => {
       let dateKey = r.date;
@@ -615,11 +682,14 @@ async function fetchAllFeeds(){
     Object.values(newLog).forEach(arr => arr.sort((a,b) => a.time.localeCompare(b.time)));
     feedingLog = newLog;
     setSyncStatus('connected', 'Synkronoitu (Google Sheets)');
-    render();
+    // Ei uudelleenpiirretä, jos jokin lomake on juuri auki kesken täytön —
+    // muuten taustapäivitys pyyhkisi pois kesken olevan valinnan.
+    if(!anyFormOpen()){
+      render();
+    }
   }catch(e){
     console.error(e);
-    const msg = e.name === 'AbortError' ? 'Yhteys aikakatkaistu (8s)' : (e.message || String(e));
-    setSyncStatus('error', 'Virhe: ' + msg);
+    setSyncStatus('error', 'Virhe: ' + (e.message || String(e)));
   }
 }
 
@@ -636,6 +706,10 @@ function addFeed(dateStr, baby, type, time, amount){
   if(!feedingLog[dateStr]) feedingLog[dateStr] = [];
   feedingLog[dateStr].push({ id, baby, type, time, amount });
   feedingLog[dateStr].sort((a,b) => a.time.localeCompare(b.time));
+  if(type === 'äidinmaito' || type === 'korvike'){
+    lastFeedDefaults[baby] = { type, amount };
+    try{ localStorage.setItem(DEFAULTS_KEY, JSON.stringify(lastFeedDefaults)); }catch(e){}
+  }
   render();
   postAction({ action: 'add', id, date: dateStr, baby, type, time, amount })
     .then(() => fetchAllFeeds())
@@ -680,6 +754,18 @@ function babyFeedsForDate(dateStr, babyName){
   return (feedingLog[dateStr] || []).filter(f => f.baby === babyName);
 }
 
+function milkFeedsForDate(dateStr, babyName){
+  return babyFeedsForDate(dateStr, babyName).filter(f => f.type === 'äidinmaito' || f.type === 'korvike');
+}
+
+function vitaminEntryForDate(dateStr, babyName){
+  return babyFeedsForDate(dateStr, babyName).find(f => f.type === 'd-vitamiini');
+}
+
+function anyFormOpen(){
+  return !!document.querySelector('.add-feed-form.open');
+}
+
 function renderBabyBar(feeds){
   const total = feeds.reduce((s,f) => s + f.amount, 0);
   if(total === 0){
@@ -694,8 +780,10 @@ function renderBabyBar(feeds){
 }
 
 function renderBabySection(dateStr, baby){
-  const feeds = babyFeedsForDate(dateStr, baby.name);
+  const feeds = milkFeedsForDate(dateStr, baby.name);
   const total = feeds.reduce((s,f) => s + f.amount, 0);
+  const vitamin = vitaminEntryForDate(dateStr, baby.name);
+  const defaults = lastFeedDefaults[baby.name] || { type: 'äidinmaito', amount: '' };
 
   const listHtml = feeds.length
     ? `<ul class="feed-list">${feeds.map(f => `
@@ -722,13 +810,17 @@ function renderBabySection(dateStr, baby){
       <form class="add-feed-form">
         <input type="time" class="feed-time-input" required>
         <select class="feed-type-input">
-          <option value="äidinmaito">Äidinmaito</option>
-          <option value="korvike">Korvike</option>
+          <option value="äidinmaito" ${defaults.type === 'äidinmaito' ? 'selected' : ''}>Äidinmaito</option>
+          <option value="korvike" ${defaults.type === 'korvike' ? 'selected' : ''}>Korvike</option>
         </select>
-        <input type="number" class="feed-amount-input" placeholder="ml" min="1" step="1" required>
+        <input type="number" class="feed-amount-input" placeholder="ml" min="1" step="1" required value="${defaults.amount || ''}">
         <button type="submit" class="save-btn">Tallenna</button>
         <button type="button" class="cancel-add">Peruuta</button>
       </form>
+      <label class="vitamin-toggle">
+        <input type="checkbox" class="vitamin-checkbox" ${vitamin ? 'checked' : ''}>
+        D-vitamiini annettu
+      </label>
     </div>`;
 }
 
@@ -757,7 +849,7 @@ function renderSummary(weekDates){
   body.innerHTML = BABIES.map(baby => {
     let total = 0, milk = 0, formula = 0, count = 0;
     weekDates.forEach(d => {
-      babyFeedsForDate(toISODate(d), baby.name).forEach(f => {
+      milkFeedsForDate(toISODate(d), baby.name).forEach(f => {
         total += f.amount;
         count += 1;
         if(f.type === 'äidinmaito') milk += f.amount; else formula += f.amount;
@@ -774,12 +866,26 @@ function renderSummary(weekDates){
   }).join('');
 }
 
+function renderDailyBreakdown(weekDates){
+  const el = document.getElementById('dailyBreakdown');
+  const dayAbbrev = ['Ma','Ti','Ke','To','Pe','La','Su'];
+  el.innerHTML = weekDates.map((d, i) => {
+    const dateStr = toISODate(d);
+    const babyTotals = BABIES.map(baby => {
+      const total = milkFeedsForDate(dateStr, baby.name).reduce((s,f) => s + f.amount, 0);
+      return `<span class="daily-baby ${baby.key}"><span class="dot"></span>${total} ml</span>`;
+    }).join('');
+    return `<div class="daily-row"><span class="daily-day">${dayAbbrev[i]} ${d.getDate()}.${d.getMonth()+1}.</span><span class="daily-babies">${babyTotals}</span></div>`;
+  }).join('');
+}
+
 function render(){
   document.getElementById('weekLabel').textContent = weekLabel(currentMonday);
   const weekDates = Array.from({length:7}, (_,i) => addDays(currentMonday, i));
   const daysEl = document.getElementById('days');
   daysEl.innerHTML = weekDates.map(renderDayCard).join('');
   renderSummary(weekDates);
+  renderDailyBreakdown(weekDates);
 }
 
 function setupEvents(){
@@ -798,6 +904,22 @@ function setupEvents(){
   document.getElementById('refreshBtn').addEventListener('click', (e) => {
     e.target.classList.add('spinning');
     fetchAllFeeds().finally(() => e.target.classList.remove('spinning'));
+  });
+
+  document.getElementById('days').addEventListener('change', (e) => {
+    const vitaminCb = e.target.closest('.vitamin-checkbox');
+    if(vitaminCb){
+      const section = vitaminCb.closest('.baby-section');
+      const dateStr = vitaminCb.closest('.day-card').dataset.date;
+      const baby = section.dataset.baby;
+      if(vitaminCb.checked){
+        const now = new Date();
+        addFeed(dateStr, baby, 'd-vitamiini', `${pad(now.getHours())}:${pad(now.getMinutes())}`, 1);
+      } else {
+        const existing = vitaminEntryForDate(dateStr, baby);
+        if(existing) deleteFeed(dateStr, existing.id);
+      }
+    }
   });
 
   document.getElementById('days').addEventListener('click', (e) => {
@@ -888,6 +1010,7 @@ function setupConfigScreen(){
 }
 
 function init(){
+  try{ lastFeedDefaults = JSON.parse(localStorage.getItem(DEFAULTS_KEY) || '{}'); }catch(e){ lastFeedDefaults = {}; }
   setupEvents();
   setupConfigScreen();
   render();
